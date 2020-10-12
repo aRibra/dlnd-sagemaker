@@ -70,9 +70,12 @@ def predict_fn(input_data, model):
     #         data_X   - A sequence of length 500 which represents the converted review
     #         data_len - The length of the review
 
-    data_X = input_data[0]
-    data_len = input_data[1]
+#     data_X = input_data[0]
+#     data_len = input_data[1]
 
+    words = review_to_words(input_data)
+    data_X, data_len  = convert_and_pad(model.word_dict, words)    
+    
     # Using data_X and data_len we construct an appropriate input tensor. Remember
     # that our model expects input data of the form 'len, review[500]'.
     data_pack = np.hstack((data_len, data_X))
@@ -87,8 +90,10 @@ def predict_fn(input_data, model):
     # TODO: Compute the result of applying the model to the input data. The variable `result` should
     #       be a numpy array which contains a single integer which is either 1 or 0
 
-    if result < 0.5:
-        result = np.int(0)
-    else:
-        result = np.int(1)
+    out_ = model.forward(data)
+    out_ = out_.detach().cpu().numpy()
+    
+    result = np.round(out_)
+    
     return result
+
